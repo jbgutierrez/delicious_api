@@ -2,17 +2,34 @@ require File.dirname(__FILE__) + '/../spec_helper'
 
 include DeliciousApi
 
+def instance(*args)
+  DeliciousApi::Base.new(*args)
+end
+
 describe Base do
  
   describe "Initialization" do
     
-    it "should raise error when no credentials have been specified"
+    USER = 'user'
+    PASSWORD = 'password'
+    USER_AGENT = 'Firefox/3.0.7'
     
-    it "should set user and password"
+    it "should raise error when no credentials have been specified" do
+      lambda { instance(nil, nil) }.should raise_error(ArgumentError)
+      lambda { instance(USER, nil) }.should raise_error(ArgumentError)
+      lambda { instance(nil, PASSWORD) }.should raise_error(ArgumentError)
+    end
     
-    it "should set a default User-Agent"
+    it "should set user and password and a default User-Agent" do
+      base = instance(USER, PASSWORD)
+      base.user.should eql(USER)
+      base.password.should eql(PASSWORD)
+    end
     
-    it "should allow an optional User-Agent"
+    it "should allow an optional User-Agent" do      
+      base = instance(USER, PASSWORD, USER_AGENT)
+      base.user_agent.should equal(USER_AGENT)
+    end
     
   end
   
