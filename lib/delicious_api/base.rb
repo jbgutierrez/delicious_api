@@ -34,22 +34,18 @@ module DeliciousApi
 
     ##
     # Add a post to Delicious
-    # Arguments
-    # 
-    # &url={URL}
-    #     (required) the url of the item.
-    # &description={...}
-    #     (required) the description of the item.
-    # &extended={...}
-    #     (optional) notes for the item.
-    # &tags={...}
-    #     (optional) tags for the item (space delimited).
-    # &dt={CCYY-MM-DDThh:mm:ssZ}
-    #     (optional) datestamp of the item (format "CCYY-MM-DDThh:mm:ssZ"). Requires a LITERAL "T" and "Z" like in ISO8601 at http://www.cl.cam.ac.uk/~mgk25/iso-time.html for example: "1984-09-01T14:21:31Z"
-    # &replace=no
-    #     (optional) don't replace post if given url has already been posted.
-    # &shared=no
-    #     (optional) make the item private
+    # ==== Parameters
+    # * <tt>url</tt> - the url of the item.
+    # * <tt>description</tt> - the description of the item.
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>extended</tt> - notes for the item.
+    #   - <tt>tags</tt> - tags for the item (space delimited).
+    #   - <tt>dt</tt> - datestamp of the item (format "CCYY-MM-DDThh:mm:ssZ"). Requires a LITERAL "T" and "Z" like in ISO8601 at http://www.cl.cam.ac.uk/~mgk25/iso-time.html for example: "1984-09-01T14:21:31Z"
+    #   - <tt>replace=no</tt> - don't replace post if given url has already been posted.
+    #   - <tt>shared=no</tt> - make the item private
+    # ==== Result
+    # * <tt>true</tt> if the bookmark was successfully added
+    # * <tt>false</tt> if the addition failed   
     def add_bookmark(url, description, options = {})
       options.assert_valid_keys(:extended, :tags, :dt, :replace, :shared)
       options[:url], options[:description] = url, description
@@ -59,10 +55,11 @@ module DeliciousApi
 
     ##
     # Delete a post from Delicious
-    # Arguments
-    # 
-    # &url={URL}
-    #     (required) the url of the item.
+    # ==== Parameters
+    # * <tt>url</tt> - the url of the item.
+    # ==== Result
+    # * <tt>true</tt> if the bookmark was successfully deleted
+    # * <tt>false</tt> if the deletion failed   
     def delete_bookmark(url)
       options = { :url => url }
       doc = retrieve_data(API_URL_DELETE_POST + options.to_query)
@@ -71,18 +68,15 @@ module DeliciousApi
     
     ##
     # Returns one or more posts on a single day matching the arguments. If no date or url is given, most recent date will be used.
-    # Arguments
-    # 
-    # &tag={TAG}+{TAG}+...+{TAG}
-    #     (optional) Filter by this tag.
-    # &dt={CCYY-MM-DDThh:mm:ssZ}
-    #     (optional) Filter by this date, defaults to the most recent date on which bookmarks were saved.
-    # &url={URL}
-    #     (optional) Fetch a bookmark for this URL, regardless of date. Note: Be sure to URL-encode the argument value.
-    # &hashes={MD5}+{MD5}+...+{MD5}
-    #     (optional) Fetch multiple bookmarks by one or more URL MD5s regardless of date, separated by URL-encoded spaces (ie. '+').
-    # &meta=yes
-    #     (optional) Include change detection signatures on each item in a 'meta' attribute. Clients wishing to maintain a synchronized local store of bookmarks should retain the value of this attribute - its value will change when any significant field of the bookmark changes.
+    # ==== Parameters
+    # * <tt>dt</tt> - Filter by this date, defaults to the most recent date on which bookmarks were saved.
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>tag</tt> - [TAG,TAG,...TAG] Filter by this tag.
+    #   - <tt>url</tt> - Fetch a bookmark for this URL, regardless of date.
+    #   - <tt>hashes</tt> - [MD5,MD5,...,MD5] Fetch multiple bookmarks by one or more URL MD5s regardless of date, separated by URL-encoded spaces (ie. '+').
+    #   - <tt>meta=yes</tt> - Include change detection signatures on each item in a 'meta' attribute. Clients wishing to maintain a synchronized local store of bookmarks should retain the value of this attribute - its value will change when any significant field of the bookmark changes.
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Posts</tt> matching the criteria
     def get_by_date(dt, options)
       options = { :dt => dt } unless dt.nil?
       options.assert_valid_keys(:tag, :dt, :url, :hashes, :meta)
@@ -90,18 +84,23 @@ module DeliciousApi
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
     end
 
+    ##
+    # Returns a <tt>Post</tt> for the <tt>url</tt>
+    # ==== Parameters
+    # * <tt>url</tt> - Fetch a bookmark for this URL.
+    # ==== Result
+    # A <tt>Post</tt> matching the criteria
     def get(url)
       get_by_date(nil, :url=> url).first
     end
 
     ##
     # Returns a list of the most recent posts, filtered by argument. Maximum 100.
-    #
-    # Arguments
-    #   &tag={TAG}
-    #     (optional) Filter by this tag.
-    #   &count={1..100}
-    #     (optional) Number of items to retrieve (Default:15, Maximum:100). 
+    # ==== Parameters
+    # * <tt>tag</tt> - Filter by this tag.
+    # * <tt>count</tt> - Number of items to retrieve (Default:15, Maximum:100). 
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Posts</tt> matching the criteria
     def recent_bookmarks(options = {})
       options.assert_valid_keys(:tag, :count)
       doc = retrieve_data(API_URL_RECENT_POSTS + options.to_query)
