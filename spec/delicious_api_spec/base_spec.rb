@@ -115,7 +115,7 @@ describe Base do
       @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
       
       # actual method
-      bookmarks = @base.get_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
+      bookmarks = @base.get_bookmark_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
 
       # return value expectations
       bookmarks.size.should == 1
@@ -148,7 +148,7 @@ describe Base do
       @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
       
       # actual method
-      bookmark = @base.get('http://www.yahoo.com/')
+      bookmark = @base.get_bookmark_by_url('http://www.yahoo.com/')
 
       # return value expectations
       bookmark.should be_a_kind_of(Bookmark)
