@@ -71,9 +71,31 @@ describe Base do
       @base = instance(USER, PASSWORD)
     end
 
-    it "should be able to add a new bookmark"
+    it "should be able to add a new bookmark" do
+      url = '/v1/posts/add?description=foo&url=bar'
+      xml = '<result code="done" />'
+      # mocking
+      @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
+      
+      # actual method call
+      result = @base.add_bookmark 'bar', 'foo'
+      
+      # return value expectations
+      result.should == true
+    end
   
-    it "should be able to delete an existing bookmark"
+    it "should be able to delete an existing bookmark" do
+      url = '/v1/posts/delete?url=foo'
+      xml = '<result code="done" />'
+      # mocking
+      @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
+      
+      # actual method call
+      result = @base.delete_bookmark 'foo'
+      
+      # return value expectations
+      result.should == true
+    end
   
     it "should be able to get bookmark for a single date, or fetch specific items"
   
