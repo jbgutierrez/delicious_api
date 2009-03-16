@@ -31,6 +31,7 @@ module DeliciousApi
     API_URL_DELETE_BOOKMARK      = '/v1/posts/delete?'
     API_URL_GET_BOOKMARK_BY_DATE = '/v1/posts/get?'
     API_URL_RECENT_BOOKMARKS     = '/v1/posts/recent?'
+    API_URL_ALL_BOOKMARKS        = '/v1/posts/all?'
 
     ##
     # Add a bookmark to Delicious
@@ -105,6 +106,24 @@ module DeliciousApi
       options.assert_valid_keys(:tag, :count)
       doc = retrieve_data(API_URL_RECENT_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
+    end
+
+    ##
+    # Returns a list with all the bookmarks, filtered by argument.
+    # ==== Parameters
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>tag</tt> - Filter by this tag.
+    #   - <tt>start</tt> - Start returning bookmarks this many results into the set.
+    #   - <tt>results</tt> - Return this many results
+    #   - <tt>fromdt</tt> - Filter for posts on this date or later (format "CCYY-MM-DDThh:mm:ssZ"). Requires a LITERAL "T" and "Z" like in ISO8601 at http://www.cl.cam.ac.uk/~mgk25/iso-time.html for example: "1984-09-01T14:21:31Z"
+    #   - <tt>todt</tt> - Return this many results (format "CCYY-MM-DDThh:mm:ssZ"). Requires a LITERAL "T" and "Z" like in ISO8601 at http://www.cl.cam.ac.uk/~mgk25/iso-time.html for example: "1984-09-01T14:21:31Z"
+    #   - <tt>meta=yes</tt> - Include change detection signatures on each item in a 'meta' attribute. Clients wishing to maintain a synchronized local store of bookmarks should retain the value of this attribute - its value will change when any significant field of the bookmark changes.
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
+    def all_bookmarks(options = {})
+      options.assert_valid_keys(:tag, :start, :results, :fromdt, :todt, :meta)
+      doc = retrieve_data(API_URL_ALL_BOOKMARKS + options.to_query)
+      (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }      
     end
 
     private

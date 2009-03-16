@@ -189,7 +189,33 @@ describe Base do
       bookmark.time.should         == DateTime.strptime('2008-01-01T00:00:00Z')
     end
   
-    it "should be able to fetch all bookmarks by date or index range"
+    it "should be able to fetch all bookmarks by date or index range" do
+      url = "/v1/posts/all?results=2"
+      xml = <<-EOS
+      <?xml version="1.0" encoding="UTF-8"?>
+      <posts user="jbgutierrez" tag="">
+        <post href="http://foo/" hash="82860ec95b0c5ca86212bfca3b352ed0" description="Foo Site" tag="Foo" time="2008-01-01T00:00:00Z" extended=""/>
+        <post href="http://bar/" hash="fbaf0c0208a3f1664d5e520fd4e8000a" description="Bar Site" tag="Bar" time="2009-01-01T00:00:00Z" extended=""/>
+      </posts>
+      EOS
+      
+      # mocking
+      @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
+      
+      # actual method
+      bookmarks = @base.all_bookmarks(:results => 2)
+
+      # return value expectations
+      bookmarks.size.should == 2
+      bookmark = bookmarks.first
+      bookmark.should be_a_kind_of(Bookmark)
+      
+      bookmark.href.should         == "http://foo/"
+      bookmark.hash.should         == "82860ec95b0c5ca86212bfca3b352ed0"
+      bookmark.description.should  == "Foo Site"
+      bookmark.tags.should         == "Foo"
+      bookmark.time.should         == DateTime.strptime('2008-01-01T00:00:00Z')
+    end
   
   end
 
