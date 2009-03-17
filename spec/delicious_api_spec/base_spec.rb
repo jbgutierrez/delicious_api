@@ -27,7 +27,7 @@ describe Base do
     end
     
     it "should allow an optional User-Agent" do      
-      base = instance(USER, PASSWORD, USER_AGENT)
+      base = instance USER, PASSWORD, :user_agent => USER_AGENT
       base.user_agent.should equal(USER_AGENT)
     end
     
@@ -115,7 +115,7 @@ describe Base do
       @base.should_receive(:retrieve_data).with(url).and_return(Hpricot.XML(xml))
       
       # actual method
-      bookmarks = @base.get_bookmark_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
+      bookmarks = @base.get_bookmarks_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
 
       # return value expectations
       bookmarks.size.should == 1

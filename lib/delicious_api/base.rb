@@ -19,19 +19,33 @@ module DeliciousApi
     # http client
     attr_reader :http_client
 
-    def initialize(user, password, user_agent = 'DeliciousApi')
+    ##
+    # Base initialize method
+    # ==== Parameters
+    # * <tt>user</tt> - Delicious username
+    # * <tt>password</tt> - Delicious password
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>user_agent</tt> - User agent to sent to the server.
+    # ==== Result
+    # An new instance of the current class
+    def initialize(user, password, options = {})
       raise ArgumentError if (user.nil? || password.nil?)
+      options.assert_valid_keys(:user_agent)
       @user = user
       @password = password
-      @user_agent = user_agent
+      @user_agent = options[:user_agent] || default_user_agent
     end
 
-    # API Paths
-    API_URL_ADD_BOOKMARK         = '/v1/posts/add?'
-    API_URL_DELETE_BOOKMARK      = '/v1/posts/delete?'
-    API_URL_GET_BOOKMARK_BY_DATE = '/v1/posts/get?'
-    API_URL_RECENT_BOOKMARKS     = '/v1/posts/recent?'
-    API_URL_ALL_BOOKMARKS        = '/v1/posts/all?'
+    # API URL to add a new bookmark
+    API_URL_ADD_BOOKMARK          = '/v1/posts/add?'
+    # API URL to delete an existing bookmark
+    API_URL_DELETE_BOOKMARK       = '/v1/posts/delete?'
+    # API URL to get a collection of bookmarks filtered by date
+    API_URL_GET_BOOKMARKS_BY_DATE = '/v1/posts/get?'
+    # API URL to get the most recent bookmarks
+    API_URL_RECENT_BOOKMARKS      = '/v1/posts/recent?'
+    # API URL to get all the bookmarks
+    API_URL_ALL_BOOKMARKS         = '/v1/posts/all?'
 
     ##
     # Add a bookmark to Delicious
@@ -78,10 +92,10 @@ module DeliciousApi
     #   - <tt>meta=yes</tt> - Include change detection signatures on each item in a 'meta' attribute. Clients wishing to maintain a synchronized local store of bookmarks should retain the value of this attribute - its value will change when any significant field of the bookmark changes.
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def get_bookmark_by_date(dt, options)
+    def get_bookmarks_by_date(dt, options)
       options = { :dt => dt } unless dt.nil?
       options.assert_valid_keys(:tag, :dt, :url, :hashes, :meta)
-      doc = retrieve_data(API_URL_GET_BOOKMARK_BY_DATE + options.to_query)
+      doc = retrieve_data(API_URL_GET_BOOKMARKS_BY_DATE + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
     end
 
@@ -92,7 +106,7 @@ module DeliciousApi
     # ==== Result
     # A <tt>Bookmark</tt> matching the criteria
     def get_bookmark_by_url(url)
-      get_bookmark_by_date(nil, :url=> url).first
+      get_bookmarks_by_date(nil, :url=> url).first
     end
 
     ##
@@ -145,6 +159,10 @@ module DeliciousApi
           req.basic_auth(@user, @password)
           @http_client.request(req)
       end
+    end
+    
+    def default_user_agent
+      return "#{NAME}/#{VERSION} (Ruby/#{RUBY_VERSION})"
     end
     
   end
