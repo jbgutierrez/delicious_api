@@ -5,16 +5,22 @@ require 'net/https'
 require 'uri'
 
 module DeliciousApi
+
+  class HTTPError < StandardError; end
+
   class Base
-    
+
     # del.icio.us account username
     attr_reader :user
-    
+
     # del.icio.us account password
     attr_reader :password
 
     # request user agent
     attr_reader :user_agent
+
+    # requests time gap
+    attr_reader :waiting_time_gap
 
     # http client
     attr_reader :http_client
@@ -26,14 +32,16 @@ module DeliciousApi
     # * <tt>password</tt> - Delicious password
     # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
     #   - <tt>user_agent</tt> - User agent to sent to the server.
+    #   - <tt>waiting_time_gap</tt> - Time gap between requests. By default is set to 1.
     # ==== Result
     # An new instance of the current class
     def initialize(user, password, options = {})
       raise ArgumentError if (user.nil? || password.nil?)
-      options.assert_valid_keys(:user_agent)
+      options.assert_valid_keys(:user_agent, :waiting_time_gap)
       @user = user
       @password = password
       @user_agent = options[:user_agent] || default_user_agent
+      @waiting_time_gap = options[:waiting_time_gap] || 1
     end
 
     # API URL to add a new bookmark
@@ -144,7 +152,7 @@ module DeliciousApi
 
     def retrieve_data(url)
       init_http_client if @http.nil?
-      response = make_web_request(url, {'User-Agent' => @user_agent})
+      response = make_web_request(url)
       Hpricot.XML(response.body)
     end
 
@@ -153,11 +161,26 @@ module DeliciousApi
       @http_client.use_ssl = true
     end
     
-    def make_web_request(url, headers)
+    def make_web_request(url)
       http_client.start do |http|
-          req = Net::HTTP::Get.new(url, headers)
+          req = Net::HTTP::Get.new(url, {'User-Agent' => @user_agent} )
           req.basic_auth(@user, @password)
-          @http_client.request(req)
+          current_time = Time.now
+          @last_request ||= current_time
+          waiting_time = current_time - @last_request + @waiting_time_gap
+          sleep(waiting_time) if waiting_time > 0
+          response = @http_client.request(req)
+          @last_request = Time.now
+          case response
+            when Net::HTTPSuccess
+              return response
+            when Net::HTTPUnauthorized        # 401 - HTTPUnauthorized
+              raise HTTPError, 'Invalid username or password'
+            when Net::HTTPServiceUnavailable  # 503 - HTTPServiceUnavailable
+              raise HTTPError, 'You have been throttled. Try increasing the time gap between requests.'
+            else
+              raise HTTPError, "HTTP #{response.code}: #{response.message}"
+          end
       end
     end
     
