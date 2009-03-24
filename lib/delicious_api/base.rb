@@ -151,7 +151,7 @@ module DeliciousApi
     private
 
     def retrieve_data(url)
-      init_http_client if @http.nil?
+      init_http_client if @http_client.nil?
       response = make_web_request(url)
       Hpricot.XML(response.body)
     end
@@ -166,11 +166,10 @@ module DeliciousApi
           req = Net::HTTP::Get.new(url, {'User-Agent' => @user_agent} )
           req.basic_auth(@user, @password)
           current_time = Time.now
-          @last_request ||= current_time
-          waiting_time = current_time - @last_request + @waiting_time_gap
-          sleep(waiting_time) if waiting_time > 0
+          @@last_request ||= current_time - waiting_time_gap
+          current_window = [current_time - @@last_request, waiting_time_gap].max
+          sleep(current_window) if current_window <= waiting_time_gap
           response = @http_client.request(req)
-          @last_request = Time.now
           case response
             when Net::HTTPSuccess
               return response

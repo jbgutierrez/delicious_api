@@ -8,7 +8,7 @@ USER_AGENT = 'user agent'
 
 def request_should_be_sent_to(url)
   headers = { 'User-Agent' => USER_AGENT }
-  Net::HTTP::Get.should_receive(:new).with(url,headers).and_return(@request)
+  Net::HTTP::Get.should_receive(:new).with(url,headers).at_most(2).and_return(@request)
 end
 
 def stub_body_response_with(xml)
@@ -61,39 +61,46 @@ describe Base do
 
     describe "Generic request" do
       
+      def take_more_than(seconds)
+        simple_matcher("to take more than #{seconds} seconds") { |given| given > seconds }
+      end
+      
+      def send_fake_request
+        request_should_be_sent_to "/"
+        stub_body_response_with "response"        
+        @base.send :retrieve_data, "/" # not quite sure if sending a message to a a private method is a good practice
+      end
+      
       it "should use SSL" do
         Net::HTTP.should_receive(:new).with('api.del.icio.us', 443)
         @http_client.should_receive(:use_ssl=).with(true)
+        send_fake_request
       end
   
       it "should set user and password" do
         @request.should_receive(:basic_auth).with(USER, PASSWORD).once
+        send_fake_request
       end
       
       it "should set User-Agent to something identifiable"
 
-      it "should wait AT LEAST ONE SECOND between queries"
+      it "should wait AT LEAST ONE SECOND between queries" do
+        @base = DeliciousApi::Base.new(USER, PASSWORD, :user_agent => USER_AGENT )
+        measurement = Benchmark.measure{ send_fake_request; send_fake_request; }
+        measurement.real.should take_more_than 1.second
+        measurement.real.should_not take_more_than 1.05.second
+      end
 
       it "should handle 401 errors" do
         response_401 = Net::HTTPUnauthorized.new nil, nil, nil
         @http_client.stub!(:request).with(@request).and_return(response_401)
-        @error = HTTPError
+        lambda { send_fake_request }.should raise_error(HTTPError)
       end
 
       it "should handle 503 errors" do
         response_503 = Net::HTTPServiceUnavailable.new nil, nil, nil
         @http_client.stub!(:request).with(@request).and_return(response_503)
-        @error = HTTPError
-      end
-  
-      after do
-        request_should_be_sent_to "/"
-        stub_body_response_with "response"
-        if (@error)
-          lambda { @base.send :retrieve_data, "/" }.should raise_error(@error)
-        else
-          @base.send :retrieve_data, "/" # not quite sure if send a message to a a private method is a good practice
-        end
+        lambda { send_fake_request }.should raise_error(HTTPError)
       end
 
     end
