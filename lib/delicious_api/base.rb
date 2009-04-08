@@ -132,7 +132,7 @@ module DeliciousApi
     # * <tt>count</tt> - Number of items to retrieve (Default:15, Maximum:100). 
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def recent_bookmarks(options = {})
+    def get_recent_bookmarks(options = {})
       options.assert_valid_keys(:tag, :count)
       doc = retrieve_data(API_URL_RECENT_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
@@ -150,7 +150,7 @@ module DeliciousApi
     #   - <tt>meta=yes</tt> - Include change detection signatures on each item in a 'meta' attribute. Clients wishing to maintain a synchronized local store of bookmarks should retain the value of this attribute - its value will change when any significant field of the bookmark changes.
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def all_bookmarks(options = {})
+    def get_all_bookmarks(options = {})
       options.assert_valid_keys(:tag, :start, :results, :fromdt, :todt, :meta)
       doc = retrieve_data(API_URL_ALL_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }      
@@ -160,7 +160,7 @@ module DeliciousApi
     # Returns a list of tags and number of times used by a user.
     # ==== Result
     # An <tt>Array</tt> of <tt>Tags</tt>
-    def all_tags
+    def get_all_tags
       doc = retrieve_data(API_URL_ALL_TAGS)
       (doc/'tags/tag').collect{ |tag| Tag.new(tag.attributes) }      
     end

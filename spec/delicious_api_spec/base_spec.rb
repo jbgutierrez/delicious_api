@@ -121,7 +121,7 @@ describe Base do
         </tags>
         EOS
         # actual method call
-        tags = @base.all_tags
+        tags = @base.get_all_tags
     
         # return value expectations
         tags.size.should == 6
@@ -311,7 +311,7 @@ describe Base do
         EOS
     
         # actual method
-        bookmarks = @base.recent_bookmarks(:count => 2)
+        bookmarks = @base.get_recent_bookmarks(:count => 2)
 
         # return value expectations
         bookmarks.size.should == 2
@@ -337,7 +337,7 @@ describe Base do
         EOS
 
         # actual method
-        bookmarks = @base.all_bookmarks(:results => 2)
+        bookmarks = @base.get_all_bookmarks(:results => 2)
 
         # return value expectations
         bookmarks.size.should == 2
