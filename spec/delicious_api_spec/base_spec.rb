@@ -107,11 +107,55 @@ describe Base do
 
     describe "Tags requests" do
 
-      it "should be able to fetch all tags"
+      it "should be able to fetch all tags" do
+        #mocking
+        request_should_be_sent_to '/v1/tags/get'
+        stub_body_response_with <<-EOS
+        <tags>
+          <tag count="1" tag="activedesktop" />
+          <tag count="1" tag="business" />
+          <tag count="3" tag="radio" />
+          <tag count="5" tag="xml" />
+          <tag count="1" tag="xp" />
+          <tag count="1" tag="xpi" />
+        </tags>
+        EOS
+        # actual method call
+        tags = @base.all_tags
+    
+        # return value expectations
+        tags.size.should == 6
+        tag = tags.first
+        tag.should be_a_kind_of(Tag)
 
-      it "should be able to rename a tag on all posts"
+        tag.name.should  == "activedesktop"
+        tag.count.should == "1"
+      end
 
-      it "should be able to delete a tag from all posts"
+      it "should be able to rename a tag on all posts" do
+        # mocking
+        request_should_be_sent_to '/v1/tags/rename?new=new_name&old=original_name'
+        stub_body_response_with '<result code="done" />'
+    
+        # actual method call
+        result = @base.rename_tag 'original_name', 'new_name'
+    
+        # return value expectations
+        result.should == true
+        
+      end
+
+      it "should be able to delete a tag from all posts" do
+        # mocking
+        request_should_be_sent_to '/v1/tags/delete?tag=tag_to_delete'
+        stub_body_response_with '<result code="done" />'
+    
+        # actual method call
+        result = @base.delete_tag 'tag_to_delete'
+    
+        # return value expectations
+        result.should == true        
+      end
 
       it "should be able to fetch popular, recommended and network tags for a specific url"
 

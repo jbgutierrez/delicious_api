@@ -54,6 +54,12 @@ module DeliciousApi
     API_URL_RECENT_BOOKMARKS      = '/v1/posts/recent?'
     # API URL to get all the bookmarks
     API_URL_ALL_BOOKMARKS         = '/v1/posts/all?'
+    # API URL to get all the tag
+    API_URL_ALL_TAGS              = '/v1/tags/get'
+    # API URL to rename an existing tag
+    API_URL_RENAME_TAG            = '/v1/tags/rename?'    
+    # API URL to delete an existing tag
+    API_URL_DELETE_TAG            = '/v1/tags/delete?'
 
     ##
     # Add a bookmark to Delicious
@@ -146,6 +152,41 @@ module DeliciousApi
       options.assert_valid_keys(:tag, :start, :results, :fromdt, :todt, :meta)
       doc = retrieve_data(API_URL_ALL_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }      
+    end
+    
+    ##
+    # Returns a list of tags and number of times used by a user.
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Tags</tt>
+    def all_tags
+      doc = retrieve_data(API_URL_ALL_TAGS)
+      (doc/'tags/tag').collect{ |tag| Tag.new(tag.attributes) }      
+    end
+    
+    ##
+    # Rename an existing tag with a new tag name.
+    # ==== Parameters
+    # * <tt>old_name</tt> - Original tag name.
+    # * <tt>new_name</tt> - New tag name.
+    # ==== Result
+    # * <tt>true</tt> if the tag was successfully renamed
+    # * <tt>false</tt> otherwise   
+    def rename_tag(old_name, new_name)
+      options = { :old => old_name, :new => new_name }
+      doc = retrieve_data(API_URL_RENAME_TAG + options.to_query)
+      doc.at('result')['code'] == 'done'      
+    end
+    
+    # Delete a tag from Delicious
+    # ==== Parameters
+    # * <tt>tag_to_delete</tt> - tag name to delete.
+    # ==== Result
+    # * <tt>true</tt> if the tag was successfully deleted
+    # * <tt>false</tt> if the deletion failed   
+    def delete_tag(tag_to_delete)
+      options = { :tag => tag_to_delete }
+      doc = retrieve_data(API_URL_DELETE_TAG + options.to_query)
+      doc.at('result')['code'] == 'done'      
     end
 
     private
