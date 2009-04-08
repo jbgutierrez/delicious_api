@@ -1,4 +1,3 @@
-require 'rubygems'
 require 'hpricot'
 require 'net/http'
 require 'net/https'
@@ -8,7 +7,7 @@ module DeliciousApi
 
   class HTTPError < StandardError; end
 
-  class Base
+  class Wrapper
 
     # del.icio.us account username
     attr_reader :user
@@ -26,7 +25,7 @@ module DeliciousApi
     attr_reader :http_client
 
     ##
-    # Base initialize method
+    # Wrapper initialize method
     # ==== Parameters
     # * <tt>user</tt> - Delicious username
     # * <tt>password</tt> - Delicious password

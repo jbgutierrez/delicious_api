@@ -45,6 +45,7 @@ module DeliciousApi
 
 end  # module DeliciousApi
 
+require 'rubygems'
 DeliciousApi.require_all_libs_relative_to(__FILE__)
 
 # EOF

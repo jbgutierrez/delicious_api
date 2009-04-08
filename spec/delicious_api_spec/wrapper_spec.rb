@@ -15,31 +15,31 @@ def stub_body_response_with(xml)
   @response.stub!(:body).and_return(xml)
 end
 
-describe Base do
+describe Wrapper do
  
   describe "Initialization" do
 
     it "should raise error when no credentials have been specified" do
-      lambda { DeliciousApi::Base.new(nil, nil) }.should raise_error(ArgumentError)
-      lambda { DeliciousApi::Base.new(USER, nil) }.should raise_error(ArgumentError)
-      lambda { DeliciousApi::Base.new(nil, PASSWORD) }.should raise_error(ArgumentError)
+      lambda { DeliciousApi::Wrapper.new(nil, nil) }.should raise_error(ArgumentError)
+      lambda { DeliciousApi::Wrapper.new(USER, nil) }.should raise_error(ArgumentError)
+      lambda { DeliciousApi::Wrapper.new(nil, PASSWORD) }.should raise_error(ArgumentError)
     end
     
     it "should set user and password and a default User-Agent" do
-      base = DeliciousApi::Base.new(USER, PASSWORD)
-      base.user.should eql(USER)
-      base.password.should eql(PASSWORD)
+      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD)
+      wrapper.user.should eql(USER)
+      wrapper.password.should eql(PASSWORD)
     end
     
     it "should allow an optional User-Agent" do      
-      base = DeliciousApi::Base.new(USER, PASSWORD, :user_agent => USER_AGENT)
-      base.user_agent.should equal(USER_AGENT)
+      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT)
+      wrapper.user_agent.should equal(USER_AGENT)
     end
     
     it "should allow an alternative time gap" do
       waiting_time_gap = 2
-      base = DeliciousApi::Base.new(USER, PASSWORD, :waiting_time_gap => waiting_time_gap)
-      base.waiting_time_gap.should equal(waiting_time_gap)
+      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :waiting_time_gap => waiting_time_gap)
+      wrapper.waiting_time_gap.should equal(waiting_time_gap)
     end
     
   end
@@ -49,7 +49,7 @@ describe Base do
     before do
       options = { :user_agent => USER_AGENT, :waiting_time_gap => 0 }
       
-      @base        = DeliciousApi::Base.new(USER, PASSWORD, options )
+      @wrapper        = DeliciousApi::Wrapper.new(USER, PASSWORD, options )
       @request     = Net::HTTP::Get.new('/')
       @response    = Net::HTTPSuccess.new('httpv', '200', 'msg')
       @http_client = Net::HTTP.new('api.del.icio.us')
@@ -68,7 +68,7 @@ describe Base do
       def send_fake_request
         request_should_be_sent_to "/"
         stub_body_response_with "response"        
-        @base.send :process_request, "/" # not quite sure if sending a message to a a private method is a good practice
+        @wrapper.send :process_request, "/" # not quite sure if sending a message to a a private method is a good practice
       end
       
       it "should use SSL" do
@@ -85,7 +85,7 @@ describe Base do
       it "should set User-Agent to something identifiable"
 
       it "should wait AT LEAST ONE SECOND between queries" do
-        @base = DeliciousApi::Base.new(USER, PASSWORD, :user_agent => USER_AGENT )
+        @wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT )
         measurement = Benchmark.measure{ send_fake_request; send_fake_request; }
         measurement.real.should take_more_than 1.second
         measurement.real.should_not take_more_than 1.05.second
@@ -121,7 +121,7 @@ describe Base do
         </tags>
         EOS
         # actual method call
-        tags = @base.get_all_tags
+        tags = @wrapper.get_all_tags
     
         # return value expectations
         tags.size.should == 6
@@ -138,7 +138,7 @@ describe Base do
         stub_body_response_with '<result code="done" />'
     
         # actual method call
-        result = @base.rename_tag 'original_name', 'new_name'
+        result = @wrapper.rename_tag 'original_name', 'new_name'
     
         # return value expectations
         result.should == true
@@ -151,7 +151,7 @@ describe Base do
         stub_body_response_with '<result code="done" />'
     
         # actual method call
-        result = @base.delete_tag 'tag_to_delete'
+        result = @wrapper.delete_tag 'tag_to_delete'
     
         # return value expectations
         result.should == true        
@@ -191,7 +191,7 @@ describe Base do
         </suggest>
         EOS
         # actual method call
-        suggestions = @base.get_suggested_tags_for_url('http://yahoo.com/')
+        suggestions = @wrapper.get_suggested_tags_for_url('http://yahoo.com/')
     
         # return value expectations
         suggestions[:popular].size.should     == 5
@@ -221,7 +221,7 @@ describe Base do
         stub_body_response_with '<result code="done" />'
 
         # actual method call
-        result = @base.add_bookmark 'bar', 'foo'
+        result = @wrapper.add_bookmark 'bar', 'foo'
     
         # return value expectations
         result.should == true
@@ -233,7 +233,7 @@ describe Base do
         stub_body_response_with '<result code="done" />'
     
         # actual method call
-        result = @base.delete_bookmark 'foo'
+        result = @wrapper.delete_bookmark 'foo'
     
         # return value expectations
         result.should == true
@@ -255,7 +255,7 @@ describe Base do
         EOS
     
         # actual method
-        bookmarks = @base.get_bookmarks_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
+        bookmarks = @wrapper.get_bookmarks_by_date(nil, { :tag => 'webdev', :meta => 'yes'})
 
         # return value expectations
         bookmarks.size.should == 1
@@ -286,7 +286,7 @@ describe Base do
         EOS
 
         # actual method
-        bookmark = @base.get_bookmark_by_url('http://www.yahoo.com/')
+        bookmark = @wrapper.get_bookmark_by_url('http://www.yahoo.com/')
 
         # return value expectations
         bookmark.should be_a_kind_of(Bookmark)
@@ -311,7 +311,7 @@ describe Base do
         EOS
     
         # actual method
-        bookmarks = @base.get_recent_bookmarks(:count => 2)
+        bookmarks = @wrapper.get_recent_bookmarks(:count => 2)
 
         # return value expectations
         bookmarks.size.should == 2
@@ -337,7 +337,7 @@ describe Base do
         EOS
 
         # actual method
-        bookmarks = @base.get_all_bookmarks(:results => 2)
+        bookmarks = @wrapper.get_all_bookmarks(:results => 2)
 
         # return value expectations
         bookmarks.size.should == 2
@@ -366,7 +366,7 @@ describe Base do
         EOS
 
         # actual method
-        bundles = @base.get_all_bundles
+        bundles = @wrapper.get_all_bundles
 
         # return value expectations
         bundles.size.should == 2
@@ -387,7 +387,7 @@ describe Base do
         EOS
 
         # actual method
-        bundle = @base.get_bundle_by_name 'music'
+        bundle = @wrapper.get_bundle_by_name 'music'
 
         # return value expectations
         bundle.should be_a_kind_of(Bundle)
@@ -401,7 +401,7 @@ describe Base do
         stub_body_response_with "<result>ok</result>"
 
         # actual method
-        result = @base.set_bundle 'music', 'ipod mp3 music'
+        result = @wrapper.set_bundle 'music', 'ipod mp3 music'
 
         # return value expectations
         result.should == true
@@ -413,7 +413,7 @@ describe Base do
         stub_body_response_with '<result code="done" />'
 
         # actual method call
-        result = @base.delete_bundle 'foo'
+        result = @wrapper.delete_bundle 'foo'
 
         # return value expectations
         result.should == true
