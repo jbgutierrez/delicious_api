@@ -157,7 +157,59 @@ describe Base do
         result.should == true        
       end
 
-      it "should be able to fetch popular, recommended and network tags for a specific url"
+      it "should be able to fetch popular, recommended and network tags for a specific url" do
+        #mocking
+        request_should_be_sent_to '/v1/posts/suggest?url=http%3A%2F%2Fyahoo.com%2F'
+        stub_body_response_with <<-EOS
+        <?xml version="1.0" encoding="UTF-8"?>
+        <suggest>
+          <popular>yahoo!</popular>
+          <popular>yahoo</popular>
+          <popular>web</popular>
+          <popular>tools</popular>
+          <popular>searchengines</popular>
+          <recommended>yahoo!</recommended>
+          <recommended>yahoo</recommended>
+          <recommended>web</recommended>
+          <recommended>tools</recommended>
+          <recommended>search</recommended>
+          <recommended>reference</recommended>
+          <recommended>portal</recommended>
+          <recommended>news</recommended>
+          <recommended>music</recommended>
+          <recommended>internet</recommended>
+          <recommended>home</recommended>
+          <recommended>games</recommended>
+          <recommended>entertainment</recommended>
+          <recommended>email</recommended>
+          <network>for:Bernard</network>
+          <network>for:britta</network>
+          <network>for:deusx</network>
+          <network>for:joshua</network>
+          <network>for:stlhood</network>
+          <network>for:theteam</network>
+        </suggest>
+        EOS
+        # actual method call
+        suggestions = @base.get_suggested_tags_for_url('http://yahoo.com/')
+    
+        # return value expectations
+        suggestions[:popular].size.should     == 5
+        suggestions[:recommended].size.should == 14
+        suggestions[:network].size.should     == 6
+
+        first_popular = suggestions[:popular].first
+        first_popular.should be_a_kind_of(Tag)
+        first_popular.name.should == 'yahoo!'
+
+        first_recommended = suggestions[:recommended].first
+        first_recommended.should be_a_kind_of(Tag)
+        first_recommended.name.should == 'yahoo!'
+
+        first_network = suggestions[:network].first
+        first_network.should be_a_kind_of(Tag)
+        first_network.name.should == 'for:Bernard'
+      end
 
     end
 

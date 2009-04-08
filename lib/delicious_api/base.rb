@@ -60,6 +60,8 @@ module DeliciousApi
     API_URL_RENAME_TAG            = '/v1/tags/rename?'    
     # API URL to delete an existing tag
     API_URL_DELETE_TAG            = '/v1/tags/delete?'
+    # API URL to get popular, recommended and network tags for a particular url
+    API_URL_SUGGEST_TAG           = '/v1/posts/suggest?'
 
     ##
     # Add a bookmark to Delicious
@@ -187,6 +189,23 @@ module DeliciousApi
       options = { :tag => tag_to_delete }
       doc = retrieve_data(API_URL_DELETE_TAG + options.to_query)
       doc.at('result')['code'] == 'done'      
+    end
+
+    ##
+    # Returns a list of popular tags, recommended tags and network tags for the given url.
+    # This method is intended to provide suggestions for tagging a particular url. 
+    # ==== Parameters
+    # * <tt>url</tt> - URL for which you'd like suggestions.
+    # ==== Result
+    # A <tt>Hash</tt> containing three arrays of <tt>Tags</tt>: <tt>:popular</tt>, <tt>:recommended</tt> and <tt>:network</tt>
+    def get_suggested_tags_for_url(url)
+      options = { :url => url }
+      doc = retrieve_data(API_URL_SUGGEST_TAG + options.to_query)
+      result = { }
+      result[:popular]     = (doc/'suggest/popular').collect{ |tag| Tag.new('tag' => tag.inner_html) }
+      result[:recommended] = (doc/'suggest/recommended').collect{ |tag| Tag.new('tag' => tag.inner_html) }
+      result[:network]     = (doc/'suggest/network').collect{ |tag| Tag.new('tag' => tag.inner_html) }
+      result
     end
 
     private
