@@ -4,6 +4,4 @@ include DeliciousApi
 
 describe Tag do
   
-  it "should create new tag from xml doc"
-
 end
