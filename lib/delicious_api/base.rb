@@ -86,7 +86,7 @@ module DeliciousApi
     def add_bookmark(url, description, options = {})
       options.assert_valid_keys(:extended, :tags, :dt, :replace, :shared)
       options[:url], options[:description] = url, description
-      doc = retrieve_data(API_URL_ADD_BOOKMARK + options.to_query)
+      doc = process_request(API_URL_ADD_BOOKMARK + options.to_query)
       doc.at('result')['code'] == 'done'      
     end
 
@@ -99,7 +99,7 @@ module DeliciousApi
     # * <tt>false</tt> if the deletion failed   
     def delete_bookmark(url)
       options = { :url => url }
-      doc = retrieve_data(API_URL_DELETE_BOOKMARK + options.to_query)
+      doc = process_request(API_URL_DELETE_BOOKMARK + options.to_query)
       doc.at('result')['code'] == 'done'      
     end
     
@@ -117,7 +117,7 @@ module DeliciousApi
     def get_bookmarks_by_date(dt, options)
       options = { :dt => dt } unless dt.nil?
       options.assert_valid_keys(:tag, :dt, :url, :hashes, :meta)
-      doc = retrieve_data(API_URL_GET_BOOKMARKS_BY_DATE + options.to_query)
+      doc = process_request(API_URL_GET_BOOKMARKS_BY_DATE + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
     end
 
@@ -140,7 +140,7 @@ module DeliciousApi
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def get_recent_bookmarks(options = {})
       options.assert_valid_keys(:tag, :count)
-      doc = retrieve_data(API_URL_RECENT_BOOKMARKS + options.to_query)
+      doc = process_request(API_URL_RECENT_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
     end
 
@@ -158,7 +158,7 @@ module DeliciousApi
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def get_all_bookmarks(options = {})
       options.assert_valid_keys(:tag, :start, :results, :fromdt, :todt, :meta)
-      doc = retrieve_data(API_URL_ALL_BOOKMARKS + options.to_query)
+      doc = process_request(API_URL_ALL_BOOKMARKS + options.to_query)
       (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }      
     end
     
@@ -167,7 +167,7 @@ module DeliciousApi
     # ==== Result
     # An <tt>Array</tt> of <tt>Tags</tt>
     def get_all_tags
-      doc = retrieve_data(API_URL_ALL_TAGS)
+      doc = process_request(API_URL_ALL_TAGS)
       (doc/'tags/tag').collect{ |tag| Tag.new(tag.attributes) }      
     end
     
@@ -181,7 +181,7 @@ module DeliciousApi
     # * <tt>false</tt> otherwise   
     def rename_tag(old_name, new_name)
       options = { :old => old_name, :new => new_name }
-      doc = retrieve_data(API_URL_RENAME_TAG + options.to_query)
+      doc = process_request(API_URL_RENAME_TAG + options.to_query)
       doc.at('result')['code'] == 'done'      
     end
     
@@ -193,7 +193,7 @@ module DeliciousApi
     # * <tt>false</tt> if the deletion failed   
     def delete_tag(tag_to_delete)
       options = { :tag => tag_to_delete }
-      doc = retrieve_data(API_URL_DELETE_TAG + options.to_query)
+      doc = process_request(API_URL_DELETE_TAG + options.to_query)
       doc.at('result')['code'] == 'done'      
     end
 
@@ -206,7 +206,7 @@ module DeliciousApi
     # A <tt>Hash</tt> containing three arrays of <tt>Tags</tt>: <tt>:popular</tt>, <tt>:recommended</tt> and <tt>:network</tt>
     def get_suggested_tags_for_url(url)
       options = { :url => url }
-      doc = retrieve_data(API_URL_SUGGEST_TAG + options.to_query)
+      doc = process_request(API_URL_SUGGEST_TAG + options.to_query)
       result = { }
       result[:popular]     = (doc/'suggest/popular').collect{ |tag| Tag.new('tag' => tag.inner_html) }
       result[:recommended] = (doc/'suggest/recommended').collect{ |tag| Tag.new('tag' => tag.inner_html) }
@@ -223,7 +223,7 @@ module DeliciousApi
     # An <tt>Array</tt> of <tt>Bundles</tt> matching the criteria
     def get_all_bundles(options = {})
       options.assert_valid_keys(:bundle)
-      doc = retrieve_data(API_URL_ALL_BUNDLES + options.to_query)
+      doc = process_request(API_URL_ALL_BUNDLES + options.to_query)
       (doc/'bundles/bundle').collect{ |bundle| Bundle.new(bundle.attributes) }
     end
 
@@ -247,7 +247,7 @@ module DeliciousApi
     # * <tt>false</tt> if the bundle was not set
     def set_bundle(name, tags)
       options = { :bundle => name, :tags => tags }
-      doc = retrieve_data(API_URL_SET_BUNDLE + options.to_query)
+      doc = process_request(API_URL_SET_BUNDLE + options.to_query)
       doc.at('result').inner_html == 'ok'
     end
 
@@ -260,13 +260,13 @@ module DeliciousApi
     # * <tt>false</tt> if the deletion failed
     def delete_bundle(name)
       options = { :bundle => name }
-      doc = retrieve_data(API_URL_DELETE_BUNDLE + options.to_query)
+      doc = process_request(API_URL_DELETE_BUNDLE + options.to_query)
       doc.at('result')['code'] == 'done'
     end
 
     private
 
-    def retrieve_data(url)
+    def process_request(url)
       init_http_client if @http_client.nil?
       response = make_web_request(url)
       Hpricot.XML(response.body)

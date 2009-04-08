@@ -68,7 +68,7 @@ describe Base do
       def send_fake_request
         request_should_be_sent_to "/"
         stub_body_response_with "response"        
-        @base.send :retrieve_data, "/" # not quite sure if sending a message to a a private method is a good practice
+        @base.send :process_request, "/" # not quite sure if sending a message to a a private method is a good practice
       end
       
       it "should use SSL" do
