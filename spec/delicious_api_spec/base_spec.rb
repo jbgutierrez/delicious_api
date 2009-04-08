@@ -355,11 +355,69 @@ describe Base do
 
     describe "Tag Bundles requests" do
 
-      it "should be able to fetch tag bundles"
+      it "should be able to fetch all the user tag bundles" do
+        # mocking
+        request_should_be_sent_to "/v1/tags/bundles/all?"
+        stub_body_response_with <<-EOS
+        <bundles>
+          <bundle name="languages" tags="galician spanish english french" />
+          <bundle name="music" tags="ipod mp3 music" />
+        </bundles>
+        EOS
 
-      it "should be able to assign a set of tags to a bundle"
+        # actual method
+        bundles = @base.get_all_bundles
 
-      it "should be able to delete a tag bundle" 
+        # return value expectations
+        bundles.size.should == 2
+        bundle = bundles.first
+        bundle.should be_a_kind_of(Bundle)
+
+        bundle.name.should == "languages"
+        bundle.tags.should == "galician spanish english french"
+      end
+
+      it "should be able to fetch specific tag bundle" do
+        # mocking
+        request_should_be_sent_to "/v1/tags/bundles/all?bundle=music"
+        stub_body_response_with <<-EOS
+        <bundles>
+          <bundle name="music" tags="ipod mp3 music" />
+        </bundles>
+        EOS
+
+        # actual method
+        bundle = @base.get_bundle_by_name 'music'
+
+        # return value expectations
+        bundle.should be_a_kind_of(Bundle)
+        bundle.name.should == "music"
+        bundle.tags.should == "ipod mp3 music"
+      end
+
+      it "should be able to assign a set of tags to a bundle" do
+        # mocking
+        request_should_be_sent_to "/v1/tags/bundles/set?bundle=music&tags=ipod+mp3+music"
+        stub_body_response_with "<result>ok</result>"
+
+        # actual method
+        result = @base.set_bundle 'music', 'ipod mp3 music'
+
+        # return value expectations
+        result.should == true
+      end
+
+      it "should be able to delete a tag bundle" do
+        # mocking
+        request_should_be_sent_to '/v1/tags/bundles/delete?bundle=foo'
+        stub_body_response_with '<result code="done" />'
+
+        # actual method call
+        result = @base.delete_bundle 'foo'
+
+        # return value expectations
+        result.should == true
+      end
   
     end
 

@@ -62,6 +62,12 @@ module DeliciousApi
     API_URL_DELETE_TAG            = '/v1/tags/delete?'
     # API URL to get popular, recommended and network tags for a particular url
     API_URL_SUGGEST_TAG           = '/v1/posts/suggest?'
+    # API URL to get all of a user's bundles.
+    API_URL_ALL_BUNDLES           = '/v1/tags/bundles/all?'
+    # API URL to set a tag bundle
+    API_URL_SET_BUNDLE            = '/v1/tags/bundles/set?'
+    # API URL to delete an existing bundle
+    API_URL_DELETE_BUNDLE         = '/v1/tags/bundles/delete?'
 
     ##
     # Add a bookmark to Delicious
@@ -120,7 +126,7 @@ module DeliciousApi
     # ==== Parameters
     # * <tt>url</tt> - Fetch a bookmark for this URL.
     # ==== Result
-    # A <tt>Bookmark</tt> matching the criteria
+    # A <tt>Bookmark</tt> matching the criteria or nil
     def get_bookmark_by_url(url)
       get_bookmarks_by_date(nil, :url=> url).first
     end
@@ -206,6 +212,56 @@ module DeliciousApi
       result[:recommended] = (doc/'suggest/recommended').collect{ |tag| Tag.new('tag' => tag.inner_html) }
       result[:network]     = (doc/'suggest/network').collect{ |tag| Tag.new('tag' => tag.inner_html) }
       result
+    end
+
+    ##
+    # Retrieve all of a user's bundles.
+    # ==== Parameters
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>bundle</tt> - Fetch just the named bundle.
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Bundles</tt> matching the criteria
+    def get_all_bundles(options = {})
+      options.assert_valid_keys(:bundle)
+      doc = retrieve_data(API_URL_ALL_BUNDLES + options.to_query)
+      (doc/'bundles/bundle').collect{ |bundle| Bundle.new(bundle.attributes) }
+    end
+
+    ##
+    # Returns the user <tt>Bundle</tt> with the given <tt>name</tt>
+    # ==== Parameters
+    # * <tt>name</tt> - User's bundle name.
+    # ==== Result
+    # A <tt>Bundle</tt> matching the criteria or nil
+    def get_bundle_by_name(name)
+      get_all_bundles(:bundle => name).first
+    end
+
+    ##
+    # Assign a set of tags to a single bundle, wipes away previous settings for bundle.
+    # ==== Parameters
+    # * <tt>name</tt> - bundle's name.
+    # * <tt>tags</tt> - tags for the bundle (space delimited).
+    # ==== Result
+    # * <tt>true</tt> if the bundle was set
+    # * <tt>false</tt> if the bundle was not set
+    def set_bundle(name, tags)
+      options = { :bundle => name, :tags => tags }
+      doc = retrieve_data(API_URL_SET_BUNDLE + options.to_query)
+      doc.at('result').inner_html == 'ok'
+    end
+
+    ##
+    # Delete a bundle from Delicious
+    # ==== Parameters
+    # * <tt>name</tt> - name of the bundle
+    # ==== Result
+    # * <tt>true</tt> if the bundle was successfully deleted
+    # * <tt>false</tt> if the deletion failed
+    def delete_bundle(name)
+      options = { :bundle => name }
+      doc = retrieve_data(API_URL_DELETE_BUNDLE + options.to_query)
+      doc.at('result')['code'] == 'done'
     end
 
     private
