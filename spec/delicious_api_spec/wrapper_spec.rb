@@ -20,25 +20,25 @@ describe Wrapper do
   describe "Initialization" do
 
     it "should raise error when no credentials have been specified" do
-      lambda { DeliciousApi::Wrapper.new(nil, nil) }.should raise_error(ArgumentError)
-      lambda { DeliciousApi::Wrapper.new(USER, nil) }.should raise_error(ArgumentError)
-      lambda { DeliciousApi::Wrapper.new(nil, PASSWORD) }.should raise_error(ArgumentError)
+      lambda { Wrapper.new(nil, nil) }.should raise_error(ArgumentError)
+      lambda { Wrapper.new(USER, nil) }.should raise_error(ArgumentError)
+      lambda { Wrapper.new(nil, PASSWORD) }.should raise_error(ArgumentError)
     end
     
     it "should set user and password and a default User-Agent" do
-      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD)
+      wrapper = Wrapper.new(USER, PASSWORD)
       wrapper.user.should eql(USER)
       wrapper.password.should eql(PASSWORD)
     end
     
     it "should allow an optional User-Agent" do      
-      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT)
+      wrapper = Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT)
       wrapper.user_agent.should equal(USER_AGENT)
     end
     
     it "should allow an alternative time gap" do
       waiting_time_gap = 2
-      wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :waiting_time_gap => waiting_time_gap)
+      wrapper = Wrapper.new(USER, PASSWORD, :waiting_time_gap => waiting_time_gap)
       wrapper.waiting_time_gap.should equal(waiting_time_gap)
     end
     
@@ -49,7 +49,7 @@ describe Wrapper do
     before do
       options = { :user_agent => USER_AGENT, :waiting_time_gap => 0 }
       
-      @wrapper        = DeliciousApi::Wrapper.new(USER, PASSWORD, options )
+      @wrapper     = Wrapper.new(USER, PASSWORD, options )
       @request     = Net::HTTP::Get.new('/')
       @response    = Net::HTTPSuccess.new('httpv', '200', 'msg')
       @http_client = Net::HTTP.new('api.del.icio.us')
@@ -60,10 +60,6 @@ describe Wrapper do
     end
 
     describe "Generic request" do
-      
-      def take_more_than(seconds)
-        simple_matcher("to take more than #{seconds} seconds") { |given| given > seconds }
-      end
       
       def send_fake_request
         request_should_be_sent_to "/"
@@ -85,7 +81,7 @@ describe Wrapper do
       it "should set User-Agent to something identifiable"
 
       it "should wait AT LEAST ONE SECOND between queries" do
-        @wrapper = DeliciousApi::Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT )
+        @wrapper = Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT )
         measurement = Benchmark.measure{ send_fake_request; send_fake_request; }
         measurement.real.should take_more_than 1.second
         measurement.real.should_not take_more_than 1.05.second
@@ -102,12 +98,14 @@ describe Wrapper do
         @http_client.stub!(:request).with(@request).and_return(response_503)
         lambda { send_fake_request }.should raise_error(HTTPError)
       end
+      
+      it "should raise an exception when something goes wrong"
 
     end
 
     describe "Tags requests" do
 
-      it "should be able to fetch all tags" do
+      it "should fetch all tags" do
         #mocking
         request_should_be_sent_to '/v1/tags/get'
         stub_body_response_with <<-EOS
@@ -132,7 +130,7 @@ describe Wrapper do
         tag.count.should == "1"
       end
 
-      it "should be able to rename a tag on all posts" do
+      it "should rename a tag on all posts" do
         # mocking
         request_should_be_sent_to '/v1/tags/rename?new=new_name&old=original_name'
         stub_body_response_with '<result code="done" />'
@@ -145,7 +143,7 @@ describe Wrapper do
         
       end
 
-      it "should be able to delete a tag from all posts" do
+      it "should delete a tag from all posts" do
         # mocking
         request_should_be_sent_to '/v1/tags/delete?tag=tag_to_delete'
         stub_body_response_with '<result code="done" />'
@@ -157,7 +155,7 @@ describe Wrapper do
         result.should == true        
       end
 
-      it "should be able to fetch popular, recommended and network tags for a specific url" do
+      it "should fetch popular, recommended and network tags for a specific url" do
         #mocking
         request_should_be_sent_to '/v1/posts/suggest?url=http%3A%2F%2Fyahoo.com%2F'
         stub_body_response_with <<-EOS
@@ -215,7 +213,7 @@ describe Wrapper do
 
     describe "Bookmark requests" do
 
-      it "should be able to add a new bookmark" do
+      it "should add a new bookmark" do
         # mocking
         request_should_be_sent_to '/v1/posts/add?description=foo&url=bar'
         stub_body_response_with '<result code="done" />'
@@ -227,7 +225,7 @@ describe Wrapper do
         result.should == true
       end
 
-      it "should be able to delete an existing bookmark" do
+      it "should delete an existing bookmark" do
         # mocking
         request_should_be_sent_to '/v1/posts/delete?url=foo'
         stub_body_response_with '<result code="done" />'
@@ -239,7 +237,7 @@ describe Wrapper do
         result.should == true
       end
 
-      it "should be able to get bookmark for a single date" do
+      it "should get bookmark for a single date" do
         # mocking
         request_should_be_sent_to '/v1/posts/get?meta=yes&tag=webdev'
         stub_body_response_with <<-EOS
@@ -271,7 +269,7 @@ describe Wrapper do
         bookmark.time.should         == DateTime.strptime('2005-11-28T05:26:09Z')
       end
 
-      it "should be able to get fetch a specific bookmark" do
+      it "should get fetch a specific bookmark" do
         # mocking
         request_should_be_sent_to '/v1/posts/get?url=http%3A%2F%2Fwww.yahoo.com%2F'
         stub_body_response_with <<-EOS
@@ -299,7 +297,7 @@ describe Wrapper do
         bookmark.time.should         == DateTime.strptime('2007-12-11T00:00:07Z')
       end
 
-      it "should be able to fetch recent bookmarks" do
+      it "should fetch recent bookmarks" do
         # mocking
         request_should_be_sent_to '/v1/posts/recent?count=2'
         stub_body_response_with <<-EOS
@@ -325,7 +323,7 @@ describe Wrapper do
         bookmark.time.should         == DateTime.strptime('2008-01-01T00:00:00Z')
       end
 
-      it "should be able to fetch all bookmarks by date or index range" do
+      it "should fetch all bookmarks by date or index range" do
         # mocking
         request_should_be_sent_to "/v1/posts/all?results=2"
         stub_body_response_with <<-EOS
@@ -355,7 +353,7 @@ describe Wrapper do
 
     describe "Tag Bundles requests" do
 
-      it "should be able to fetch all the user tag bundles" do
+      it "should fetch user bundles" do
         # mocking
         request_should_be_sent_to "/v1/tags/bundles/all?"
         stub_body_response_with <<-EOS
@@ -377,7 +375,7 @@ describe Wrapper do
         bundle.tags.should == "galician spanish english french"
       end
 
-      it "should be able to fetch specific tag bundle" do
+      it "should fetch a specific tag bundle" do
         # mocking
         request_should_be_sent_to "/v1/tags/bundles/all?bundle=music"
         stub_body_response_with <<-EOS
@@ -395,7 +393,7 @@ describe Wrapper do
         bundle.tags.should == "ipod mp3 music"
       end
 
-      it "should be able to assign a set of tags to a bundle" do
+      it "should assign a set of tags to a bundle" do
         # mocking
         request_should_be_sent_to "/v1/tags/bundles/set?bundle=music&tags=ipod+mp3+music"
         stub_body_response_with "<result>ok</result>"
@@ -407,7 +405,7 @@ describe Wrapper do
         result.should == true
       end
 
-      it "should be able to delete a tag bundle" do
+      it "should delete a tag bundle" do
         # mocking
         request_should_be_sent_to '/v1/tags/bundles/delete?bundle=foo'
         stub_body_response_with '<result code="done" />'
@@ -423,11 +421,11 @@ describe Wrapper do
 
     describe "Other requests" do
 
-      it "should be able to fetch a change detection manifest of all items"
+      it "should fetch a change detection manifest of all items"
 
-      it "should be able to list dates on which bookmarks were posted"
+      it "should list dates on which bookmarks were posted"
 
-      it "should be able to check to see when a user last posted an item."
+      it "should check to see when a user last posted an item."
 
     end
 

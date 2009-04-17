@@ -1,4 +1,4 @@
-
+require File.dirname(__FILE__) + "/custom_matchers"
 require File.expand_path(
     File.join(File.dirname(__FILE__), %w[.. lib delicious_api]))
 
@@ -11,6 +11,8 @@ Spec::Runner.configure do |config|
   # config.mock_with :mocha
   # config.mock_with :flexmock
   # config.mock_with :rr
+  config.include(CustomMatchers)
+  config.include(DeliciousApi)
 end
 
 # EOF
