@@ -5,7 +5,7 @@ require 'uri'
 
 module DeliciousApi
 
-  class HTTPError < StandardError; end
+  class HTTPError < DeliciousApiError; end
 
   class Wrapper
 

@@ -1,6 +1,9 @@
 
 module DeliciousApi
 
+  # Generic Delicious Api exception class.
+  class DeliciousApiError < StandardError; end
+
   # :stopdoc:
   NAME = 'DeliciousApi'
   VERSION = '1.0.0'
