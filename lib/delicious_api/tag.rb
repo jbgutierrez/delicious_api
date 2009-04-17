@@ -1,9 +1,31 @@
+require File.dirname(__FILE__) + '/base'
+
 module DeliciousApi
-  class Tag
-    attr_reader :name, :count
-    def initialize(params)
-      @name   = params['tag']
-      @count  = params['count']
+  class Tag < Base
+
+    attr_accessor :name, :original_name, :count
+
+    def initialize(name, params = {})
+      params.merge!('name' => name, 'original_name' => name)
+      assign params
+    end
+
+    # Retrieves a list of tags and number of times used from Delicious
+    def self.all
+      self.wrapper.get_all_tags
+    end
+
+    # Deletes a tag from Delicious
+    def delete
+      wrapper.delete_tag(@name)
+    end
+
+    # Updates a tag name at Delicious (if necessary)
+    def save
+      unless @original_name == @name
+        wrapper.rename_tag(@original_name, @name)
+        @original_name = @name
+      end
     end
   end
 end

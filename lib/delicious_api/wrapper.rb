@@ -167,7 +167,7 @@ module DeliciousApi
     # An <tt>Array</tt> of <tt>Tags</tt>
     def get_all_tags
       doc = process_request(API_URL_ALL_TAGS)
-      (doc/'tags/tag').collect{ |tag| Tag.new(tag.attributes) }      
+      (doc/'tags/tag').collect{ |tag| Tag.new(tag['tag'], tag.attributes) }
     end
     
     ##
@@ -207,9 +207,9 @@ module DeliciousApi
       options = { :url => url }
       doc = process_request(API_URL_SUGGEST_TAG + options.to_query)
       result = { }
-      result[:popular]     = (doc/'suggest/popular').collect{ |tag| Tag.new('tag' => tag.inner_html) }
-      result[:recommended] = (doc/'suggest/recommended').collect{ |tag| Tag.new('tag' => tag.inner_html) }
-      result[:network]     = (doc/'suggest/network').collect{ |tag| Tag.new('tag' => tag.inner_html) }
+      result[:popular]     = (doc/'suggest/popular').collect{ |tag| Tag.new(tag.inner_html) }
+      result[:recommended] = (doc/'suggest/recommended').collect{ |tag| Tag.new(tag.inner_html) }
+      result[:network]     = (doc/'suggest/network').collect{ |tag| Tag.new(tag.inner_html) }
       result
     end
 

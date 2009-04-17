@@ -1,9 +1,31 @@
 require File.dirname(__FILE__) + '/../spec_helper'
 
+include DeliciousApi
+
 describe Tag do
-  it "should instantiate correctly"
-  it "should fetch all tags"
-  it "should remove a tag"
-  it "should rename a tag"
-  it "should find bookmarks by tags"
+
+  configure_wrapper
+
+  it "should instantiate correctly" do
+    tag = Tag.new 'name', 'count' => '5'
+    tag.name.should == 'name'
+  end
+
+  it "should fetch all tags" do
+    Base.wrapper.should_receive(:get_all_tags)
+    Tag.all
+  end
+
+  it "should remove a tag" do
+    tag = Tag.new 'old_name'
+    tag.wrapper.should_receive(:delete_tag).with(tag.name)
+    tag.delete
+  end
+
+  it "should rename a tag" do
+    tag = Tag.new 'old_name'
+    tag.wrapper.should_receive(:rename_tag).with(tag.name, 'new_name')
+    tag.name = 'new_name'
+    tag.save
+  end
 end
