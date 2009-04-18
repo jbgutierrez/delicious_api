@@ -17,11 +17,13 @@ module DeliciousApi
 
     # Deletes a tag from Delicious
     def delete
+      validate_presence_of :name
       wrapper.delete_tag(@name)
     end
 
     # Updates a tag name at Delicious (if necessary)
     def save
+      validate_presence_of :name
       unless @original_name == @name
         wrapper.rename_tag(@original_name, @name)
         @original_name = @name

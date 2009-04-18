@@ -17,9 +17,12 @@ describe Tag do
   end
 
   it "should remove a tag" do
-    tag = Tag.new 'old_name'
+    tag = Tag.new 'name'
     tag.wrapper.should_receive(:delete_tag).with(tag.name)
     tag.delete
+
+    tag.name = nil
+    lambda { tag.delete }.should raise_error(MissingAttributeError)
   end
 
   it "should rename a tag" do
@@ -27,5 +30,8 @@ describe Tag do
     tag.wrapper.should_receive(:rename_tag).with(tag.name, 'new_name')
     tag.name = 'new_name'
     tag.save
+
+    tag.name = nil
+    lambda { tag.save }.should raise_error(MissingAttributeError)
   end
 end

@@ -223,7 +223,7 @@ module DeliciousApi
     def get_all_bundles(options = {})
       options.assert_valid_keys(:bundle)
       doc = process_request(API_URL_ALL_BUNDLES + options.to_query)
-      (doc/'bundles/bundle').collect{ |bundle| Bundle.new(bundle.attributes) }
+      (doc/'bundles/bundle').collect{ |bundle| Bundle.new(bundle['name'], bundle['tags'].split(' ')) }
     end
 
     ##

@@ -372,7 +372,7 @@ describe Wrapper do
         bundle.should be_a_kind_of(Bundle)
 
         bundle.name.should == "languages"
-        bundle.tags.should == "galician spanish english french"
+        bundle.tags.should == %w[galician spanish english french]
       end
 
       it "should fetch a specific tag bundle" do
@@ -390,7 +390,7 @@ describe Wrapper do
         # return value expectations
         bundle.should be_a_kind_of(Bundle)
         bundle.name.should == "music"
-        bundle.tags.should == "ipod mp3 music"
+        bundle.tags.should == %w[ipod mp3 music]
       end
 
       it "should assign a set of tags to a bundle" do

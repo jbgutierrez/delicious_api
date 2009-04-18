@@ -3,6 +3,9 @@ module DeliciousApi
   # Raised when 'wrapper' has not been specified
   class WrapperNotInitialized < DeliciousApiError; end
 
+  # Raised when you've trying to use the 'wrapper' with incorrect parameters.
+  class MissingAttributeError < DeliciousApiError; end
+
   class Base
 
     class << self
@@ -36,6 +39,15 @@ module DeliciousApi
       params.each_pair do |key, value|
         self.send("#{key}=", value) rescue next
       end
+    end
+
+    def validate_presence_of(*attributes)
+      missing_attributes = []
+      attributes.each do |attribute|
+        value = self.send(attribute)
+        missing_attributes << attribute if value.nil? || value.empty?
+      end
+      raise(MissingAttributeError, "Missing required attribute(s): #{missing_attributes.join(", ")}") unless missing_attributes.empty?
     end
 
   end
