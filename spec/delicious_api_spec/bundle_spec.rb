@@ -28,7 +28,7 @@ describe Bundle do
     empty = Bundle.new nil
     lambda { empty.save }.should raise_error(MissingAttributeError)
 
-    without_tags = Bundle.new 'languages'
+    without_tags = Bundle.new 'languages', nil
     lambda { without_tags.save }.should raise_error(MissingAttributeError)
 
     without_name = Bundle.new nil, %w[galician spanish english french]

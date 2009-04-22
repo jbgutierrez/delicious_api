@@ -266,7 +266,7 @@ describe Wrapper do
         bookmark.meta.should         == "92959a96fd69146c5fe7cbde6e5720f2"
         bookmark.others.should       == "55"
         bookmark.tags.should         == "dom javascript webdev"
-        bookmark.time.should         == DateTime.strptime('2005-11-28T05:26:09Z')
+        bookmark.time.should         == Time.iso8601('2005-11-28T05:26:09Z')
       end
 
       it "should get fetch a specific bookmark" do
@@ -294,7 +294,7 @@ describe Wrapper do
         bookmark.hash.should         == "2f9704c729e7ed3b41647b7d0ad649fe"
         bookmark.others.should       == "433"
         bookmark.tags.should         == "yahoo web search"
-        bookmark.time.should         == DateTime.strptime('2007-12-11T00:00:07Z')
+        bookmark.time.should         == Time.iso8601('2007-12-11T00:00:07Z')
       end
 
       it "should fetch recent bookmarks" do
@@ -320,7 +320,7 @@ describe Wrapper do
         bookmark.hash.should         == "82860ec95b0c5ca86212bfca3b352ed0"
         bookmark.description.should  == "Foo Site"
         bookmark.tags.should         == "Foo"
-        bookmark.time.should         == DateTime.strptime('2008-01-01T00:00:00Z')
+        bookmark.time.should         == Time.iso8601('2008-01-01T00:00:00Z')
       end
 
       it "should fetch all bookmarks by date or index range" do
@@ -346,7 +346,7 @@ describe Wrapper do
         bookmark.hash.should         == "82860ec95b0c5ca86212bfca3b352ed0"
         bookmark.description.should  == "Foo Site"
         bookmark.tags.should         == "Foo"
-        bookmark.time.should         == DateTime.strptime('2008-01-01T00:00:00Z')
+        bookmark.time.should         == Time.iso8601('2008-01-01T00:00:00Z')
       end
 
     end

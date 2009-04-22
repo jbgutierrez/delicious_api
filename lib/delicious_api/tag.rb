@@ -6,7 +6,7 @@ module DeliciousApi
     attr_accessor :name, :original_name, :count
 
     def initialize(name, params = {})
-      params.merge!('name' => name, 'original_name' => name)
+      params.merge!(:name => name, :original_name => name)
       assign params
     end
 
