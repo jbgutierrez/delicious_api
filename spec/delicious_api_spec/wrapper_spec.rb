@@ -225,16 +225,20 @@ describe Wrapper do
         result.should == true
       end
 
-      it "should delete an existing bookmark" do
-        # mocking
-        request_should_be_sent_to '/v1/posts/delete?url=foo'
-        stub_body_response_with '<result code="done" />'
-    
-        # actual method call
-        result = @wrapper.delete_bookmark 'foo'
-    
-        # return value expectations
-        result.should == true
+      describe "should delete an existing bookmark" do
+        it do
+          request_should_be_sent_to '/v1/posts/delete?url=foo'
+          stub_body_response_with '<result code="done" />'
+          result = @wrapper.delete_bookmark 'foo'
+          result.should == true
+        end
+
+        it "(item not found)" do
+          request_should_be_sent_to '/v1/posts/delete?url=foo'
+          stub_body_response_with '<result code="item not found" />'
+          result = @wrapper.delete_bookmark 'foo'
+          result.should == true
+        end
       end
 
       it "should get bookmark for a single date" do

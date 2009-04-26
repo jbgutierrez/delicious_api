@@ -99,7 +99,7 @@ module DeliciousApi
     def delete_bookmark(url)
       options = { :url => url }
       doc = process_request(API_URL_DELETE_BOOKMARK + options.to_query)
-      doc.at('result')['code'] == 'done'      
+      doc.at('result')['code'] == 'done' || doc.at('result')['code'] == 'item not found'
     end
     
     ##

@@ -18,13 +18,13 @@ module DeliciousApi
     # Updates a tag bundle at Delicious
     def save
       validate_presence_of :name, :tags
-      wrapper.set_bundle @name, @tags.join(' ')
+      wrapper.set_bundle(@name, @tags.join(' ')) || raise(OperationFailed)
     end
 
     # Deletes a tag bundle from Delicious
     def delete
       validate_presence_of :name
-      wrapper.delete_bundle(@name)
+      wrapper.delete_bundle(@name) || raise(OperationFailed)
     end
   end
 end

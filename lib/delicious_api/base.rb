@@ -6,6 +6,9 @@ module DeliciousApi
   # Raised when you've trying to use the 'wrapper' with incorrect parameters.
   class MissingAttributeError < DeliciousApiError; end
 
+  # Raised when something goes wrong at the 'wrapper'
+  class OperationFailed < DeliciousApiError; end
+
   class Base
 
     class << self
@@ -45,7 +48,7 @@ module DeliciousApi
       missing_attributes = []
       attributes.each do |attribute|
         value = self.send(attribute)
-        missing_attributes << attribute if value.nil? || value.empty?
+        missing_attributes << attribute if value.nil? || value.instance_of?(String) && value.empty?
       end
       raise(MissingAttributeError, "Missing required attribute(s): #{missing_attributes.join(", ")}") unless missing_attributes.empty?
     end

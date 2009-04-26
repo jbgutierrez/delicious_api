@@ -6,42 +6,71 @@ describe Bundle do
 
   configure_wrapper
 
-  it "should instantiate correctly" do
-    bundle = Bundle.new 'languages', %w[galician spanish english french]
-    bundle.name.should == 'languages'
-    bundle.tags.size.should == 4
-    bundle.tags.first.should == 'galician'
-    bundle.tags.last.should == 'french'
+  describe "an instance of the Bundle class" do
+
+    before(:each) do
+      @bundle = Bundle.new 'languages', %w[galician spanish english french]
+    end
+
+    it "should have a name" do
+      @bundle.name.should == 'languages'
+    end
+
+    it "should have an array of tags" do
+      @bundle.tags.size.should == 4
+      @bundle.tags.first.should == 'galician'
+      @bundle.tags.last.should == 'french'
+    end
+
+    describe "having a save method" do
+
+      it "should do it succesfully" do
+        @bundle.wrapper.should_receive(:set_bundle).with(@bundle.name, @bundle.tags.join(' ')).and_return(true)
+        @bundle.save
+      end
+
+      it "should raise an exception on missing attributes" do
+        @bundle.name = nil
+        @bundle.tags = nil
+        lambda { @bundle.save }.should raise_error(MissingAttributeError)
+      end
+
+      it "should raise OperationFailed" do
+        @bundle.wrapper.should_receive(:set_bundle).and_return(false)
+        lambda { @bundle.save }.should raise_error(OperationFailed)
+      end
+
+    end
+
+    describe "having a remove method" do
+
+      it "should do it succesfully" do
+        @bundle.wrapper.should_receive(:delete_bundle).with(@bundle.name).and_return(true)
+        @bundle.delete
+      end
+
+      it "should raise an exception on missing attributes" do
+        @bundle.name = nil
+        lambda { @bundle.delete }.should raise_error(MissingAttributeError)
+      end
+
+      it "should raise OperationFailed" do
+        @bundle.wrapper.should_receive(:delete_bundle).and_return(false)
+        lambda { @bundle.delete }.should raise_error(OperationFailed)
+      end
+
+    end
+
   end
 
-  it "should fetch tag bundles" do
-    LIMIT = 10
-    Base.wrapper.should_receive(:get_all_bundles).with(LIMIT)
-    Bundle.all(LIMIT)
-  end
+  describe "Bundle class" do
 
-  it "should save a tag bundle" do
-    bundle = Bundle.new 'languages', %w[galician spanish english french]
-    bundle.wrapper.should_receive(:set_bundle).with(bundle.name, 'galician spanish english french')
-    bundle.save
+    it "should fetch tag bundles" do
+      LIMIT = 10
+      Base.wrapper.should_receive(:get_all_bundles).with(LIMIT)
+      Bundle.all(LIMIT)
+    end
 
-    empty = Bundle.new nil
-    lambda { empty.save }.should raise_error(MissingAttributeError)
-
-    without_tags = Bundle.new 'languages', nil
-    lambda { without_tags.save }.should raise_error(MissingAttributeError)
-
-    without_name = Bundle.new nil, %w[galician spanish english french]
-    lambda { without_name.save }.should raise_error(MissingAttributeError)
-  end
-
-  it "should remove a tag bundle" do
-    bundle = Bundle.new 'languages'
-    bundle.wrapper.should_receive(:delete_bundle).with(bundle.name)
-    bundle.delete
-
-    bundle.name = nil
-    lambda { bundle.save }.should raise_error(MissingAttributeError)
   end
 
 end
