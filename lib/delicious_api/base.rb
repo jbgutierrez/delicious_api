@@ -40,7 +40,7 @@ module DeliciousApi
     # Assign the values of the Hash +params+ to the attributes of +self+ with the same key name 
     def assign(params) #:nodoc:
       params.each_pair do |key, value|
-        self.send("#{key}=", value) rescue next
+        self.send("#{key}=", value) rescue self.instance_eval("@#{key}=value") rescue next
       end
     end
 

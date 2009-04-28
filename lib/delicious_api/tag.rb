@@ -10,7 +10,7 @@ module DeliciousApi
     alias :tag :name
 
     # Number of times used
-    attr_accessor :count
+    attr_reader :count
 
     ##
     # Tag initialize method

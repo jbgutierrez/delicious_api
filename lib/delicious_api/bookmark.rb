@@ -14,13 +14,13 @@ module DeliciousApi
     attr_accessor :extended
 
     # URL MD5
-    attr_accessor :hash
+    attr_reader :hash
 
     # Change detection signature
-    attr_accessor :meta
+    attr_reader :meta
 
     # TODO: Comment!!
-    attr_accessor :others
+    attr_reader :others
 
     # <tt>Array</tt> of tags for the bookmark
     attr_accessor :tags
