@@ -1,6 +1,6 @@
 module DeliciousApi
 
-  # Raised when 'wrapper' has not been specified
+  # Raised when the 'wrapper' has not been specified
   class WrapperNotInitialized < DeliciousApiError; end
 
   # Raised when you've trying to use the 'wrapper' with incorrect parameters.
@@ -38,13 +38,23 @@ module DeliciousApi
     protected
 
     # Assign the values of the Hash +params+ to the attributes of +self+ with the same key name 
-    def assign(params)
+    def assign(params) #:nodoc:
       params.each_pair do |key, value|
         self.send("#{key}=", value) rescue next
       end
     end
 
-    def validate_presence_of(*attributes)
+    def self.before_assign(attribute, filter) #:nodoc:
+      alias_method "old_#{attribute}=", "#{attribute}="
+
+      module_eval <<-STR
+        def #{attribute}=(#{attribute})
+          self.old_#{attribute} = #{filter} #{attribute}
+        end
+      STR
+    end
+
+    def validate_presence_of(*attributes) #:nodoc:
       missing_attributes = []
       attributes.each do |attribute|
         value = self.send(attribute)

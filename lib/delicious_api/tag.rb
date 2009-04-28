@@ -3,9 +3,24 @@ require File.dirname(__FILE__) + '/base'
 module DeliciousApi
   class Tag < Base
 
-    attr_accessor :name, :original_name, :count
+    # Tag name
+    attr_accessor :name
 
+    # An alias for the tag name
+    alias :tag :name
+
+    # Number of times used
+    attr_accessor :count
+
+    ##
+    # Tag initialize method
+    # ==== Parameters
+    # * <tt>name</tt> - Tag name
+    # * <tt>params</tt> - An optional <tt>Hash</tt> containing any combination of the instance attributes
+    # ==== Result
+    # An new instance of the current class
     def initialize(name, params = {})
+      params.symbolize_keys!.assert_valid_keys(:name, :tag, :count)
       params.merge!(:name => name, :original_name => name)
       assign params
     end
@@ -29,5 +44,9 @@ module DeliciousApi
         @original_name = @name
       end
     end
+
+    protected
+    attr_accessor :original_name
+
   end
 end

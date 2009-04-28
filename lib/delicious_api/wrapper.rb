@@ -86,7 +86,7 @@ module DeliciousApi
       options.assert_valid_keys(:extended, :tags, :dt, :replace, :shared)
       options[:url], options[:description] = url, description
       doc = process_request(API_URL_ADD_BOOKMARK + options.to_query)
-      doc.at('result')['code'] == 'done'      
+      doc.at('result')['code'] == 'done' || doc.at('result')['code'] == 'item already exists'
     end
 
     ##
@@ -117,7 +117,7 @@ module DeliciousApi
       options = { :dt => dt } unless dt.nil?
       options.assert_valid_keys(:tag, :dt, :url, :hashes, :meta)
       doc = process_request(API_URL_GET_BOOKMARKS_BY_DATE + options.to_query)
-      (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
+      (doc/'posts/post').collect{ |post| Bookmark.new(post['href'], post.attributes) }
     end
 
     ##
@@ -140,7 +140,7 @@ module DeliciousApi
     def get_recent_bookmarks(options = {})
       options.assert_valid_keys(:tag, :count)
       doc = process_request(API_URL_RECENT_BOOKMARKS + options.to_query)
-      (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }
+      (doc/'posts/post').collect{ |post| Bookmark.new(post['href'], post.attributes) }
     end
 
     ##
@@ -158,7 +158,7 @@ module DeliciousApi
     def get_all_bookmarks(options = {})
       options.assert_valid_keys(:tag, :start, :results, :fromdt, :todt, :meta)
       doc = process_request(API_URL_ALL_BOOKMARKS + options.to_query)
-      (doc/'posts/post').collect{ |post| Bookmark.new(post.attributes) }      
+      (doc/'posts/post').collect{ |post| Bookmark.new(post['href'], post.attributes) }
     end
     
     ##

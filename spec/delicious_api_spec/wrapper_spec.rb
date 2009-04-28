@@ -213,16 +213,20 @@ describe Wrapper do
 
     describe "Bookmark requests" do
 
-      it "should add a new bookmark" do
-        # mocking
-        request_should_be_sent_to '/v1/posts/add?description=foo&url=bar'
-        stub_body_response_with '<result code="done" />'
+      describe "should add a new bookmark" do
+        it do
+          request_should_be_sent_to '/v1/posts/add?description=foo&url=bar'
+          stub_body_response_with '<result code="done" />'
+          result = @wrapper.add_bookmark 'bar', 'foo'
+          result.should == true
+        end
 
-        # actual method call
-        result = @wrapper.add_bookmark 'bar', 'foo'
-    
-        # return value expectations
-        result.should == true
+        it "(item already exists)" do
+          request_should_be_sent_to '/v1/posts/add?description=foo&replace=no&url=bar'
+          stub_body_response_with '<result code="item already exists" />'
+          result = @wrapper.add_bookmark 'bar', 'foo', { :replace => 'no' }
+          result.should == true
+        end
       end
 
       describe "should delete an existing bookmark" do
@@ -269,7 +273,7 @@ describe Wrapper do
         bookmark.hash.should         == "c0238dc0c44f07daedd9a1fd9bbdeebd"
         bookmark.meta.should         == "92959a96fd69146c5fe7cbde6e5720f2"
         bookmark.others.should       == "55"
-        bookmark.tags.should         == "dom javascript webdev"
+        bookmark.tags.should         == %w[dom javascript webdev]
         bookmark.time.should         == Time.iso8601('2005-11-28T05:26:09Z')
       end
 
@@ -297,7 +301,7 @@ describe Wrapper do
         bookmark.extended.should     == "My favorite site ever"
         bookmark.hash.should         == "2f9704c729e7ed3b41647b7d0ad649fe"
         bookmark.others.should       == "433"
-        bookmark.tags.should         == "yahoo web search"
+        bookmark.tags.should         == %w[yahoo web search]
         bookmark.time.should         == Time.iso8601('2007-12-11T00:00:07Z')
       end
 
@@ -323,7 +327,7 @@ describe Wrapper do
         bookmark.href.should         == "http://foo/"
         bookmark.hash.should         == "82860ec95b0c5ca86212bfca3b352ed0"
         bookmark.description.should  == "Foo Site"
-        bookmark.tags.should         == "Foo"
+        bookmark.tags.should         == %w[Foo]
         bookmark.time.should         == Time.iso8601('2008-01-01T00:00:00Z')
       end
 
@@ -349,7 +353,7 @@ describe Wrapper do
         bookmark.href.should         == "http://foo/"
         bookmark.hash.should         == "82860ec95b0c5ca86212bfca3b352ed0"
         bookmark.description.should  == "Foo Site"
-        bookmark.tags.should         == "Foo"
+        bookmark.tags.should         == %w[Foo]
         bookmark.time.should         == Time.iso8601('2008-01-01T00:00:00Z')
       end
 

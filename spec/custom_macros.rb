@@ -12,5 +12,12 @@ module CustomMacros
         Tag.wrapper = nil
       end
     end
+
+    def freeze_time
+      before(:each) do
+        time_now = Time.now.utc
+        Time.stub!(:now).and_return(time_now)
+      end
+    end
   end
 end
