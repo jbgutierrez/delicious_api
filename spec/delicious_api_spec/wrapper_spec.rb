@@ -83,8 +83,8 @@ describe Wrapper do
       it "should wait AT LEAST ONE SECOND between queries" do
         @wrapper = Wrapper.new(USER, PASSWORD, :user_agent => USER_AGENT )
         measurement = Benchmark.measure{ send_fake_request; send_fake_request; }
-        measurement.real.should take_more_than 1.second
-        measurement.real.should_not take_more_than 1.05.second
+        measurement.real.should take_more_than(1.second)
+        measurement.real.should_not take_more_than(1.05.second)
       end
 
       it "should handle 401 errors" do

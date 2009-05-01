@@ -116,7 +116,7 @@ module DeliciousApi
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def self.all(options = {})
       options.assert_valid_keys(:tag, :limit, :start_time, :end_time)
-      wrapper.get_all_bookmarks pack_all_options options
+      wrapper.get_all_bookmarks pack_all_options(options)
     end
 
     protected
