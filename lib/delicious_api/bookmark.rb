@@ -74,17 +74,46 @@ module DeliciousApi
       wrapper.get_suggested_tags_for_url @href
     end
 
+    ##
+    # Returns one or more bookmarks on a single day matching the arguments. If no date or url is given, most recent date will be used.
+    # ==== Parameters
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>url</tt>
+    #   - <tt>tags</tt>
+    #   - <tt>date</tt>
+    #   - <tt>hashes</tt>
+    #   - <tt>meta</tt>
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def self.find(options = {})
       options.assert_valid_keys(:url, :tags, :date, :hashes, :meta)
       Base.wrapper.get_bookmarks_by_date pack_find_options(options)
     end
 
+    ##
+    # Returns a list of the most recent bookmarks, filtered by argument. Maximum 100.
+    # ==== Parameters
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>limit</tt>
+    #   - <tt>tag</tt>
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def self.recent(options = {})
       options.assert_valid_keys(:tag, :limit)
       options.reverse_merge!(:limit => 10)
       Base.wrapper.get_recent_bookmarks options
     end
 
+    ##
+    # Returns a list with all the bookmarks, filtered by argument.
+    # ==== Parameters
+    # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
+    #   - <tt>tag</tt>
+    #   - <tt>limit</tt>
+    #   - <tt>start_time</tt>
+    #   - <tt>end_time</tt>
+    # ==== Result
+    # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
     def self.all(options = {})
       options.assert_valid_keys(:tag, :limit, :start_time, :end_time)
       wrapper.get_all_bookmarks pack_all_options options
