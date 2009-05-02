@@ -274,6 +274,7 @@ module DeliciousApi
     def init_http_client
       @http_client = Net::HTTP.new('api.del.icio.us', 443)
       @http_client.use_ssl = true
+      @http_client.verify_mode = OpenSSL::SSL::VERIFY_NONE
     end
     
     def make_web_request(url)
