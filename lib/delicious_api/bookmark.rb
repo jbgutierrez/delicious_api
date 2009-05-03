@@ -74,20 +74,23 @@ module DeliciousApi
       wrapper.get_suggested_tags_for_url @href
     end
 
+    # Returns one bookmark
+    def self.find(url)
+      Base.wrapper.get_bookmark_by_url(url)
+    end
+
     ##
-    # Returns one or more bookmarks on a single day matching the arguments. If no date or url is given, most recent date will be used.
+    # Returns one or more bookmarks on a single day matching the arguments. If no date is given, most recent date will be used.
     # ==== Parameters
     # * <tt>options</tt> - A <tt>Hash</tt> containing any of the following:
-    #   - <tt>url</tt>
     #   - <tt>tags</tt>
-    #   - <tt>date</tt>
     #   - <tt>hashes</tt>
-    #   - <tt>meta</tt>
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def self.find(options = {})
-      options.assert_valid_keys(:url, :tags, :date, :hashes, :meta)
-      Base.wrapper.get_bookmarks_by_date pack_find_options(options)
+    def self.find_by_date(date, options = {})
+      options.assert_valid_keys(:tags, :hashes)
+      date = date.iso8601 unless date.nil?
+      Base.wrapper.get_bookmarks_by_date date, pack_find_options(options)
     end
 
     ##
@@ -98,7 +101,7 @@ module DeliciousApi
     #   - <tt>tag</tt>
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def self.recent(options = {})
+    def self.find_recent(options = {})
       options.assert_valid_keys(:tag, :limit)
       options.reverse_merge!(:limit => 10)
       Base.wrapper.get_recent_bookmarks options
@@ -114,7 +117,7 @@ module DeliciousApi
     #   - <tt>end_time</tt>
     # ==== Result
     # An <tt>Array</tt> of <tt>Bookmarks</tt> matching the criteria
-    def self.all(options = {})
+    def self.find_all(options = {})
       options.assert_valid_keys(:tag, :limit, :start_time, :end_time)
       wrapper.get_all_bookmarks pack_all_options(options)
     end
@@ -140,11 +143,9 @@ module DeliciousApi
 
     def self.pack_find_options(options) #:nodoc:
       opt = {}
-      opt[:url]    = options[:url]                 unless options[:url].nil?
       opt[:tag]    = options[:tags].join(' ')      unless options[:tags].nil?
-      opt[:dt]     = options[:date].iso8601        unless options[:date].nil?
       opt[:hashes] = options[:hashes].join(' ')    unless options[:hashes].nil?
-      opt[:meta]   = options[:meta] ? 'yes' : 'no' unless options[:meta].nil?
+      opt[:meta]   = 'yes'
       opt
     end
 

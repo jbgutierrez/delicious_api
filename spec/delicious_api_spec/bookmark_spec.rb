@@ -137,35 +137,38 @@ describe Bookmark do
 
   describe "Bookmark class" do
 
-    it "should find a subset of all the bookmarks (start point and limit) filtered by any combination of tag, starting date and ending date" do
+    it "should find a Bookmark by its url" do
+      Base.wrapper.should_receive(:get_bookmark_by_url).with('http://www.yahoo.com/')
+      Bookmark.find 'http://www.yahoo.com/'
+    end
+
+    it "should find one or more bookmarks on a single day matching filtered (by tags or hashes) the results" do
       Base.wrapper.should_receive(:get_bookmarks_by_date).
-           with({:dt => Time.now.iso8601, :tag => 'yahoo web search',
-                 :url => 'http://www.yahoo.com/', :hashes => 'hash1 hash2 hash3', :meta => 'yes' })
-      Bookmark.find :url => 'http://www.yahoo.com/', :tags => %w[yahoo web search],
-                    :date => Time.now, :hashes => %w[hash1 hash2 hash3], :meta => true
+           with( Time.now.iso8601, {:tag => 'yahoo web search', :hashes => 'hash1 hash2 hash3', :meta => 'yes' })
+      Bookmark.find_by_date Time.now, :tags => %w[yahoo web search], :hashes => %w[hash1 hash2 hash3]
     end
 
     describe "fetching recent bookmarks" do
       it "should allow to limit and filter (by tag) the results" do
         Base.wrapper.should_receive(:get_recent_bookmarks).with(:tag => 'yahoo', :limit => 10)
-        Bookmark.recent :tag => 'yahoo', :limit => 10
+        Bookmark.find_recent :tag => 'yahoo', :limit => 10
       end
       it "should default limit size to 10" do
         Base.wrapper.should_receive(:get_recent_bookmarks).with(:tag => 'yahoo', :limit => 10)
-        Bookmark.recent :tag => 'yahoo'
+        Bookmark.find_recent :tag => 'yahoo'
       end
     end
 
     describe "fetching all the bookmarks" do
       it "should allow to limit and filter (by tag) the results" do
         Base.wrapper.should_receive(:get_all_bookmarks).with(:tag => 'yahoo', :limit => 10)
-        Bookmark.all :tag => 'yahoo', :limit => 10
+        Bookmark.find_all :tag => 'yahoo', :limit => 10
       end
       it "should allow to filter the results by a date range" do
         start_time = Time.now - 2
         end_time = Time.now
         Base.wrapper.should_receive(:get_all_bookmarks).with(:fromdt => start_time.iso8601, :todt => end_time.iso8601)
-        Bookmark.all :start_time => start_time, :end_time => end_time
+        Bookmark.find_all :start_time => start_time, :end_time => end_time
       end
     end
 
