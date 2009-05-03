@@ -86,7 +86,7 @@ module DeliciousApi
       options.assert_valid_keys(:extended, :tags, :dt, :replace, :shared)
       options[:url], options[:description] = url, description
       doc = process_request(API_URL_ADD_BOOKMARK + options.to_query)
-      doc.at('result')['code'] == 'done' || doc.at('result')['code'] == 'item already exists'
+      doc.at('result')['code'] == 'done'
     end
 
     ##

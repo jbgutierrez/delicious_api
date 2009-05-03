@@ -98,8 +98,6 @@ describe Wrapper do
         @http_client.stub!(:request).with(@request).and_return(response_503)
         lambda { send_fake_request }.should raise_error(HTTPError)
       end
-      
-      it "should raise an exception when something goes wrong"
 
     end
 
@@ -213,20 +211,11 @@ describe Wrapper do
 
     describe "Bookmark requests" do
 
-      describe "should add a new bookmark" do
-        it do
-          request_should_be_sent_to '/v1/posts/add?description=foo&url=bar'
-          stub_body_response_with '<result code="done" />'
-          result = @wrapper.add_bookmark 'bar', 'foo'
-          result.should == true
-        end
-
-        it "(item already exists)" do
-          request_should_be_sent_to '/v1/posts/add?description=foo&replace=no&url=bar'
-          stub_body_response_with '<result code="item already exists" />'
-          result = @wrapper.add_bookmark 'bar', 'foo', { :replace => 'no' }
-          result.should == true
-        end
+      it "should add a new bookmark" do
+        request_should_be_sent_to '/v1/posts/add?description=foo&url=bar'
+        stub_body_response_with '<result code="done" />'
+        result = @wrapper.add_bookmark 'bar', 'foo'
+        result.should == true
       end
 
       describe "should delete an existing bookmark" do

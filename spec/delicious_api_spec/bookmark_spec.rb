@@ -96,7 +96,7 @@ describe Bookmark do
 
       it "should raise OperationFailed" do
         @bookmark.wrapper.should_receive(:add_bookmark).and_return(false)
-        lambda { @bookmark.save }.should raise_error(OperationFailed)
+        lambda { @bookmark.save! }.should raise_error(OperationFailed)
       end
 
     end

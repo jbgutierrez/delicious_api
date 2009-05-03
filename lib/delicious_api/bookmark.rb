@@ -53,13 +53,13 @@ module DeliciousApi
     def save(replace=false)
       validate_presence_of :href, :description
       options = pack_save_options.merge(:replace => replace ? 'yes' : 'no' )
-      wrapper.add_bookmark(@href, @description, options) || raise(OperationFailed)
+      wrapper.add_bookmark(@href, @description, options)
     end
 
     # Saves the bookmark in Delicious. If it has already been posted, forces replacement 
     # of the existing bookmark contents. (Same behaviour as save(true))
     def save!
-      save(true)
+      save(true) || raise(OperationFailed)
     end
 
     # Deletes the bookmark from Delicious
