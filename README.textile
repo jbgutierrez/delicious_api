@@ -1,0 +1,136 @@
+h1. Delicious_api
+
+h2. Description
+
+delicious_api is a pure Ruby client for the "Delicious API":http://delicious.com/help/api. It provides an easy
+way to read/write bookmarks, tags and bundles to Delicious accounts.
+
+h2. Features
+
+* an object oriented design: @Bookmark@, @Tag@ and @Bundle@ classes
+* 100% covered by tests (check it for yourself!)
+* 100% documented
+* 100% Ruby 1.9 compatibility
+
+h2. Installation
+
+The following gems are required:
+
+<pre>
+sudo gem install activesupport hpricot
+</pre>
+
+and then you can (and should) get it as a gem:
+
+<pre>
+sudo gem install jbgutierrez-delicious_api --source http://gems.github.com
+</pre>
+
+h2. Basic Usage
+
+h3. Set up a DeliciousApi::Wrapper.
+
+<pre>
+DeliciousApi::Base.wrapper = DeliciousApi::Wrapper.new 'account', 'secret'
+</pre>
+
+Optionally, name your client (a.k.a. 'user agent') to something identifiable, such as your app's name.
+
+<pre>
+DeliciousApi::Base.wrapper = DeliciousApi::Wrapper.new 'account', 'secret', :user_agent => 'your-app-name'  
+</pre>
+
+In order not to get throttled, it will be a time gap of 1 second between each inner http request. Change this behaviour at your own risk:
+
+<pre>
+DeliciousApi::Base.wrapper = DeliciousApi::Wrapper.new 'account', 'secret', :waiting_time_gap => 0
+</pre>
+
+h3. Easy examples
+
+h4. Bookmarks retrieval
+
+<pre>
+bookmark = DeliciousApi::Bookmark.find 'http://www.yahoo.com/'
+bookmarks = DeliciousApi::Bookmark.find_by_date Date.now, :tags => %w[yahoo web search] 
+bookmarks = DeliciousApi::Bookmark.find_recent :tag => 'yahoo', :limit => 10
+bookmarks = DeliciousApi::Bookmark.find_all :tag => 'yahoo', :limit => 10
+bookmarks = DeliciousApi::Bookmark.find_all :start_time => 2.days.ago, :end_time => Time.now
+</pre>
+
+h4. Creating a new bookmark
+
+<pre>
+bookmark = DeliciousApi::Bookmark.new 'http://www.yahoo.com/'
+bookmark.save
+</pre>
+
+h4. Deleting a bookmark
+
+<pre>
+bookmark = DeliciousApi::Bookmark.find :url => 'http://www.yahoo.com/'
+bookmark.destroy
+</pre>
+
+h4. Updating a bookmark
+
+<pre>
+bookmark = DeliciousApi::Bookmark.find :url => 'http://www.yahoo.com/'
+
+bookmark.description = 'Yahoo!'
+bookmark.extended    = 'My favorite site ever'
+bookmark.tags        = %w[array of tags]
+
+bookmark.save  # returns false
+bookmark.save! # returns true
+</pre>
+
+h4. Copy Bookmarks between diferent accounts
+
+<pre>
+#!/usr/bin/env ruby -wKU
+require 'rubygems'
+require 'delicious_api'
+DeliciousApi::Base.wrapper = DeliciousApi::Wrapper.new 'source_account', 'secret'
+bookmarks = DeliciousApi::Bookmark.all
+DeliciousApi::Base.wrapper = DeliciousApi::Wrapper.new 'target_account', 'secret'
+bookmarks.each { |b| b.save }
+</pre>
+
+h2. Todo
+
+The following specs are pending:
+
+# should check to see when a user last posted an item. (PENDING: Not Yet Implemented)
+# should list dates on which bookmarks were posted (PENDING: Not Yet Implemented)
+# should fetch a change detection manifest of all items (PENDING: Not Yet Implemented)
+# should set User-Agent to something identifiable (PENDING: Not Yet Implemented)
+
+h2. Author
+
+"Javier Blanco Gutierrez":http://github.com/jbgutierrez
+
+h2. License
+
+See the terms of usage for the "Delicious API":http://delicious.com/help/api
+
+Copyright (c) 2009 by Javier Blanco Gutierrez under the MIT License
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of this software and associated documentation files (the
+'Software'), to deal in the Software without restriction, including
+without limitation the rights to use, copy, modify, merge, publish,
+distribute, sublicense, and/or sell copies of the Software, and to
+permit persons to whom the Software is furnished to do so, subject to
+the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
